@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom"
 import "../stylesheets/App.css"
 import Routes from "./Routes"
 
-const App = () => {
+const App = (): JSX.Element => {
   return (
     <div className="App">
       <main>

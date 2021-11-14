@@ -1,3 +1,4 @@
+import React from "react"
 import Button from "react-bootstrap/Button"
 import { useDispatch, useSelector } from "react-redux"
 import { createNewGameRequested } from "../../store/home/HomeActions"
