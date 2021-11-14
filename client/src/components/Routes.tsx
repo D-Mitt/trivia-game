@@ -5,13 +5,13 @@ import Home from "./home/Home"
 
 const NotFound = () => {
   return (
-    <div className={`dark-mode-background`}>
+    <div className={"dark-mode-background"}>
       <h1>Sorry, page not found</h1>
     </div>
   )
 }
 
-export default function Routes() {
+const Routes = (): JSX.Element => {
   return (
     <R>
       <Route 
@@ -22,3 +22,5 @@ export default function Routes() {
     </R>
   )
 }
+
+export default Routes

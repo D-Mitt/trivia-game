@@ -26,6 +26,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "lint": "npx eslint src/**/*.ts src/**/*.tsx",
+    "lint-fix": "npx eslint --fix src/**/*.ts src/**/*.tsx",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
