@@ -21,7 +21,8 @@ export interface GameData {
   timeOfNextRound: Date
   currentRound: number
   currentQuestion: string
-  currentAnswers: number[]
+  currentIncorrectAnswers: string[]
+  currentCorrectAnswer: string
   status: GameStatus
   totalUsers: number
   remainingUsers: number[]

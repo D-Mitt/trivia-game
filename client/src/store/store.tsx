@@ -11,7 +11,8 @@ export interface State {
     timeOfNextRound: Date
     currentRound: number
     currentQuestion: string
-    currentAnswers: number[]
+    currentIncorrectAnswers: string[]
+    currentCorrectAnswer: string
     status: GameStatus
     totalUsers: number
     remainingUsers: number[]
@@ -28,7 +29,8 @@ const initialState: State = {
     timeOfNextRound: new Date(),
     currentRound: 0,
     currentQuestion: "",
-    currentAnswers: [] as number[],
+    currentIncorrectAnswers: [] as string[],
+    currentCorrectAnswer: "",
     status: GameStatus.Unknown,
     totalUsers: 0,
     remainingUsers: [0],

@@ -1,0 +1,17 @@
+{
+  "development": {
+    "username": "root",
+    "password": "password1234",
+    "database": "trivia_quiz_development",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "dmitt",
+    "password": "password",
+    "database": "trivia_quiz_production",
+    "host": "localhost",
+    "dialect": "postgres",
+    "use_env_variable": "DATABASE_URL"
+  }
+}
