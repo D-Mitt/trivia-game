@@ -1,0 +1,12 @@
+.waiting-container {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+}
+
+.waiting-message {
+  font-size: calc(14px + 2vmin);
+  font-weight: 500;
+  margin-left: 1rem !important;
+}
