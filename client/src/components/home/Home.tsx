@@ -1,17 +1,26 @@
 import React from "react"
 import Button from "react-bootstrap/Button"
 import { useDispatch, useSelector } from "react-redux"
-import { createNewGameRequested } from "../../store/home/HomeActions"
+import { useNavigate } from "react-router-dom"
+import { NIL as NIL_UUID } from "uuid"
+import { createNewGame } from "../../store/game/GameActions"
 import { State } from "../../store/store"
 import "../../stylesheets/home.css"
 
 const Home = () => {
   // Set up state
   const dispatch = useDispatch()
-  const isSearchingForGame = useSelector((state: State) => state.home.isSearchingForGame)
+  const navigate = useNavigate()
+  const isSearchingForGame = useSelector((state: State) => state.game.isSearchingForGame)
+  const gameId = useSelector((state: State) => state.game.gameId)
 
   const handleClick = () => {
-    dispatch(createNewGameRequested())
+    dispatch(createNewGame())
+  }
+
+  // We found a game
+  if (gameId !== NIL_UUID) {
+    navigate(`/games/${gameId}`)
   }
 
   return (
