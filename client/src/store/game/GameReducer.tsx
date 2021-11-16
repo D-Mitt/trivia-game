@@ -1,5 +1,12 @@
 import { NIL as NIL_UUID } from "uuid"
-import { CREATE_NEW_GAME_FAILED, CREATE_NEW_GAME_REQUESTED, CREATE_NEW_GAME_SUCCEEDED, GameStatus, HomeAction } from "./GameConstants"
+import {
+  CREATE_NEW_GAME_FAILED,
+  CREATE_NEW_GAME_REQUESTED,
+  CREATE_NEW_GAME_SUCCEEDED,
+  GameStatus,
+  GET_GAME_SUCCEEDED,
+  HomeAction
+} from "./GameConstants"
 
 
 const gameReducer = (
@@ -35,6 +42,24 @@ const gameReducer = (
         isSearchingForGame: false,
         gameId: action.gameData.gameId,
         userId: action.gameData.userId,
+        isWaitingForNextRound: action.gameData.isWaitingForNextRound,
+        timeOfNextRound: action.gameData.timeOfNextRound,
+        currentRound: action.gameData.currentRound,
+        currentQuestion: action.gameData.currentQuestion,
+        currentIncorrectAnswers: action.gameData.currentIncorrectAnswers,
+        currentCorrectAnswer: action.gameData.currentCorrectAnswer,
+        status: action.gameData.status,
+        totalUsers: action.gameData.totalUsers,
+        remainingUsers: action.gameData.remainingUsers,
+        requiredToStart: action.gameData.requiredToStart,
+
+      }
+      break
+    case GET_GAME_SUCCEEDED:
+      newState = {
+        ...newState,
+        isSearchingForGame: false,
+        gameId: action.gameData.gameId,
         isWaitingForNextRound: action.gameData.isWaitingForNextRound,
         timeOfNextRound: action.gameData.timeOfNextRound,
         currentRound: action.gameData.currentRound,

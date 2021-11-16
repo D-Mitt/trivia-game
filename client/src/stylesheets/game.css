@@ -3,10 +3,18 @@
   align-items: center;
   text-align: center;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .waiting-message {
   font-size: calc(14px + 2vmin);
   font-weight: 500;
   margin-left: 1rem !important;
+}
+
+.round-start {
+  font-size: calc(14px + 2vmin);
+  font-weight: 500;
+  color: chocolate;
 }
