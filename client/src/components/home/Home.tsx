@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react"
 import Button from "react-bootstrap/Button"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { NIL as NIL_UUID } from "uuid"
 import { createNewGame } from "../../store/game/GameActions"
 import { State } from "../../store/store"
@@ -10,32 +10,39 @@ import "../../stylesheets/home.css"
 const Home = () => {
   // Set up state
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const isSearchingForGame = useSelector((state: State) => state.game.isSearchingForGame)
   const gameId = useSelector((state: State) => state.game.gameId)
-  
-  const [navigateToGames, setNavigateToGames] = useState(false)
-  const [requestCreateNewGame, setRequestCreateNewGame] = useState(!!false)
-
-  useEffect(() => {
-    if (navigateToGames) {
-      navigate(`/games/${gameId}`)
-    }
-
-    if (requestCreateNewGame) {
-      dispatch(createNewGame())
-    }
-  }, [navigateToGames, requestCreateNewGame])
-
-  const handleClick = useCallback(() => {
-    setRequestCreateNewGame(true)
-  }, [requestCreateNewGame])
 
   // We found a game
   if (gameId !== NIL_UUID) {
-    setNavigateToGames(true)
+    return <Navigate to={`/games/${gameId}`} />
   }
   
+  // Component that starts a game
+  const FindGameButton = () => {
+    const [requestCreateNewGame, setRequestCreateNewGame] = useState(false)
+    const handleClick = useCallback(() => {
+      setRequestCreateNewGame(true)
+    }, [requestCreateNewGame])
+
+    useEffect(() => {
+      if (requestCreateNewGame) {
+        dispatch(createNewGame())
+      }
+    }, [requestCreateNewGame])
+
+    return (
+      <Button
+        className="mt-5"
+        variant="primary"
+        size="lg"
+        onClick={!isSearchingForGame ? () => {handleClick()} : undefined}
+        disabled={isSearchingForGame}
+      >
+        {isSearchingForGame ? "Searching..." : "Find a Game"}
+      </Button>
+    )
+  }
 
   return (
     <div>
@@ -48,15 +55,7 @@ const Home = () => {
       <div className="description mt-3">
         Find a game below!
       </div>
-      <Button
-        className="mt-5"
-        variant="primary"
-        size="lg"
-        onClick={!isSearchingForGame ? () => handleClick : undefined}
-        disabled={isSearchingForGame}
-      >
-        {isSearchingForGame ? "Searching..." : "Find a Game"}
-      </Button>
+      <FindGameButton />
     </div>
   )
 }
