@@ -31,15 +31,12 @@ app.post('/games', function (req, res) {
   }
 
   db.Game.create(newGame)
-    .then(data => {
-      console.log("data: ", data)
+    .then(() => {
       let toReturn = {
         ...newGame,
         userId: 1,
       }
-      console.log("hihihi: ", toReturn)
       delete toReturn.nextUserId
-      console.log("toReturn: ", toReturn)
       return res.status(201).json(toReturn).end()
     })
     .catch(err => {
