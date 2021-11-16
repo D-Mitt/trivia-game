@@ -47,6 +47,27 @@ app.post('/games', function (req, res) {
     })
 })
 
+app.get('/games/:gameId', function (req, res) {
+  db.Game.findOne({ where: { gameId: req.params.gameId } })
+    .then((data) => {
+      let date = new Date(Date.now() + 10000)
+
+      let toReturn = {
+        ...data,
+        status: "WAITING",
+        isWaitingForNextRound: true,
+        timeOfNextRound: date
+      }
+      return res.status(200).json(toReturn).end()
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "An error occurred while creating the Game."
+      })
+    })
+})
+
 app.listen(process.env.PORT || port, () => {
   console.log(`Server started!`)
 })
