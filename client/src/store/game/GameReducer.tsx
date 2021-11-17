@@ -8,6 +8,24 @@ import {
   HomeAction
 } from "./GameConstants"
 
+// Fisher-Yates shuffle algorithm found here: http://sedition.com/perl/javascript-fy.html
+const shuffle = (array: any[]) => {
+  let currentIndex = array.length,  randomIndex
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]]
+  }
+
+  return array
+}
 
 const gameReducer = (
   state = {
@@ -20,6 +38,7 @@ const gameReducer = (
     currentQuestion: "",
     currentIncorrectAnswers: [] as string[],
     currentCorrectAnswer: "",
+    allCurrentAnswersShuffled: [] as string[],
     status: GameStatus.Unknown,
     totalUsers: 0,
     remainingUsers: [0],
@@ -66,6 +85,7 @@ const gameReducer = (
         currentQuestion: action.gameData.currentQuestion,
         currentIncorrectAnswers: action.gameData.currentIncorrectAnswers,
         currentCorrectAnswer: action.gameData.currentCorrectAnswer,
+        allCurrentAnswersShuffled: shuffle([...action.gameData.currentIncorrectAnswers, action.gameData.currentCorrectAnswer]),
         status: action.gameData.status,
         totalUsers: action.gameData.totalUsers,
         remainingUsers: action.gameData.remainingUsers,
@@ -84,6 +104,7 @@ const gameReducer = (
         currentRound: 0,
         currentQuestion: "",
         currentIncorrectAnswers: [] as string[],
+        allCurrentAnswersShuffled: [] as string[],
         currentCorrectAnswer: "",
         status: GameStatus.Unknown,
         totalUsers: 0,

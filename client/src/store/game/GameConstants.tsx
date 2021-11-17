@@ -33,6 +33,7 @@ export interface GameData {
   currentQuestion: string
   currentIncorrectAnswers: string[]
   currentCorrectAnswer: string
+  allCurrentAnswersShuffled: string[]
   status: GameStatus
   totalUsers: number
   remainingUsers: number[]

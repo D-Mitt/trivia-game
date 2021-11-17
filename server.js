@@ -1,7 +1,8 @@
-const express = require('express')
-const uuid = require('uuid')
+const express = require("express")
+const uuid = require("uuid")
 const cors = require("cors")
-const db = require('./models/index.js');
+const db = require("./models/index.js");
+const axios = require("axios")
 
 const app = express()
 const port = 5000
@@ -14,20 +15,81 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(cors())
 
+// simple sleep function
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+// todo: MOVE THIS FOR MULTIPLAYER
+// Set a timer so that after 10 seconds, we update the game status to "STARTED"
+const setGameStarted = async (gameObject) => {
+  // Waiting 2 extra seconds for timers to sync (game closes to newcomers 2 seconds before start)
+  await sleep(2000)
+  const questionData = await getQuestion()
+
+  return db.Game.update(
+    { 
+      status: "STARTED", 
+      isWaitingForNextRound: false, 
+      currentRound: 1, 
+      currentQuestion: questionData.question, 
+      currentCorrectAnswer: questionData.currentCorrectAnswer,
+      currentIncorrectAnswers: questionData.currentIncorrectAnswers,
+       timeOfNextRound: new Date(Date.now() + 10000)
+    },
+    { returning: true, where: { gameId: gameObject.gameId }// updated for multiplayer req.params.gameId }
+  }).then(function([ rowsUpdate, [updatedBook] ]) {
+    setTimeout(setUpNextRound, 10000, updatedBook)
+  })
+}
+
+const setUpNextRound = async (gameObject) => {
+  //TODO: if no remaining users, or 1 remaining user, end game
+  const questionData = await getQuestion()
+  db.Game.update(
+    { 
+      currentRound: gameObject.currentRound + 1, 
+      remainingUsers: [], 
+      currentQuestion: questionData.question, 
+      currentCorrectAnswer: questionData.currentCorrectAnswer,
+      currentIncorrectAnswers: questionData.currentIncorrectAnswers,
+      timeOfNextRound: new Date(Date.now() + 10000)
+    },
+    { returning: true, where: { gameId: gameObject.gameId }// updated for multiplayer req.params.gameId }
+  }).then(function([ rowsUpdate, [updatedBook] ]) {
+    setTimeout(setUpNextRound, 10000, updatedBook)
+  })
+}
+
+// Questions pulled from Open Trivia DB (https://opentdb.com/)
+const getQuestion = async () => {
+  let questionData = {}
+  const url = "https://opentdb.com/api.php?amount=1&category=9"
+  const response = await axios.get(url)
+
+  questionData.question = response.data.results[0].question
+  questionData.currentCorrectAnswer = response.data.results[0].correct_answer
+  questionData.currentIncorrectAnswers = response.data.results[0].incorrect_answers
+
+  return questionData
+}
+
 app.post('/games', function (req, res) {
   let newGame = {
     gameId: uuid.v4(),
     nextUserId: 2,
-    isWaitingForNextRound: false,
-    timeOfNextRound: new Date(),
+    isWaitingForNextRound: true, //Change this to false for multiplayer
+    timeOfNextRound: new Date(Date.now() + 12000),// change this to new Date(), for multiplayer
     currentRound: 0,
     currentQuestion: "",
     currentIncorrectAnswers: [],
     currentCorrectAnswer: "",
     status: "WAITING",
     totalUsers: 1,
-    remainingUsers: [1],
-    requiredToStart: 2
+    remainingUsers: [],
+    requiredToStart: 1 // Change this to 2 for multiplayer
   }
 
   db.Game.create(newGame)
@@ -37,6 +99,10 @@ app.post('/games', function (req, res) {
         userId: 1,
       }
       delete toReturn.nextUserId
+
+      // Change the game data with 2 seconds to spare so that people joining late won't have issues
+      setTimeout(setGameStarted, 10000, toReturn)
+
       return res.status(201).json(toReturn).end()
     })
     .catch(err => {
@@ -50,15 +116,7 @@ app.post('/games', function (req, res) {
 app.get('/games/:gameId', function (req, res) {
   db.Game.findOne({ where: { gameId: req.params.gameId } })
     .then((data) => {
-      let date = new Date(Date.now() + 10000)
-
-      let toReturn = {
-        ...data,
-        status: "WAITING",
-        isWaitingForNextRound: true,
-        timeOfNextRound: date
-      }
-      return res.status(200).json(toReturn).end()
+      return res.status(200).json(data.dataValues).end()
     })
     .catch(err => {
       res.status(500).send({
