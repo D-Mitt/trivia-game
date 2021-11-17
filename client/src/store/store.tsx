@@ -13,6 +13,7 @@ export interface State {
     currentQuestion: string
     currentIncorrectAnswers: string[]
     currentCorrectAnswer: string
+    allCurrentAnswersShuffled: string[]
     status: GameStatus
     totalUsers: number
     remainingUsers: number[]
@@ -31,6 +32,7 @@ const initialState: State = {
     currentQuestion: "",
     currentIncorrectAnswers: [] as string[],
     currentCorrectAnswer: "",
+    allCurrentAnswersShuffled: [] as string[],
     status: GameStatus.Unknown,
     totalUsers: 0,
     remainingUsers: [0],
