@@ -15,7 +15,11 @@ import {
   GET_GAME_FAILED,
   GET_GAME_REQUESTED,
   GET_GAME_SUCCEEDED,
-  HomeAction
+  HomeAction, SelectedAnswerSet, SELECTED_ANSWER_SET, UpdateRemainingPlayersFailed,
+  UpdateRemainingPlayersRequested,
+  UpdateRemainingPlayersSucceeded, UPDATE_REMAINING_PLAYERS_FAILED,
+  UPDATE_REMAINING_PLAYERS_REQUESTED,
+  UPDATE_REMAINING_PLAYERS_SUCCEEDED
 } from "./GameConstants"
 
 export const createNewGameRequested = (): CreateNewGameRequested => {
@@ -56,6 +60,31 @@ export const getGameFailed = (): GetGameFailed => {
   }
 }
 
+export const updateRemainingPlayersRequested = (): UpdateRemainingPlayersRequested => {
+  return {
+    type: UPDATE_REMAINING_PLAYERS_REQUESTED,
+  }
+}
+
+export const updateRemainingPlayersSucceeded = (): UpdateRemainingPlayersSucceeded => {
+  return {
+    type: UPDATE_REMAINING_PLAYERS_SUCCEEDED,
+  }
+}
+
+export const updateRemainingPlayersFailed = (): UpdateRemainingPlayersFailed => {
+  return {
+    type: UPDATE_REMAINING_PLAYERS_FAILED,
+  }
+}
+
+export const selectedAnswerSet = (answer: string): SelectedAnswerSet => {
+  return {
+    type: SELECTED_ANSWER_SET,
+    answer: answer
+  }
+}
+
 export const createNewGame = () => {
   return async (dispatch: Dispatch<HomeAction>) => {
     dispatch(createNewGameRequested())
@@ -78,6 +107,20 @@ export const getGame = (gameId: string) => {
       dispatch(getGameSucceeded(response.data))
     } catch (error) {
       dispatch(getGameFailed())
+    }
+  }
+}
+
+export const updateRemainingPlayers = (gameId: string, userId: number, isWrong: boolean) => {
+  return async (dispatch: Dispatch<HomeAction>) => {
+    dispatch(updateRemainingPlayersRequested())
+    try {
+      if (isWrong) {
+        await axios.post(`${BASE_URL}/games/${gameId}/remainingPlayers/${userId}`, {})
+      }
+      dispatch(updateRemainingPlayersSucceeded())
+    } catch (error) {
+      dispatch(updateRemainingPlayersFailed())
     }
   }
 }

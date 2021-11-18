@@ -1,9 +1,10 @@
 import parse from "html-react-parser"
 import React, { useEffect, useState } from "react"
+import Button from "react-bootstrap/Button"
 import Form from "react-bootstrap/Form"
 import Spinner from "react-bootstrap/Spinner"
 import { useDispatch, useSelector } from "react-redux"
-import { getGame } from "../../store/game/GameActions"
+import { getGame, updateRemainingPlayers } from "../../store/game/GameActions"
 import { GameStatus } from "../../store/game/GameConstants"
 import { State } from "../../store/store"
 import "../../stylesheets/game.css"
@@ -91,7 +92,7 @@ const Game = () => {
     return (
       <div className="waiting-container">
         <div className="mb-3">
-          {`You are Contestant #${gameState.userId}`}
+          {`You are Player #${gameState.userId}`}
         </div>
         <GameStartCountdown startTime={startTime} countdownTimer={countdownTimer}/>
         <div className="d-flex">
@@ -136,31 +137,82 @@ const Game = () => {
   }
 
   const Answers = ({gameState}: any) => {
-    // We want to randomly shuffle the answers
+    // default to none of the choices selected
+    const [selectedAnswer, setSelectedAnswer] = useState("")
+    const handleChange = (event: any) => {
+      setSelectedAnswer((event.target.id as string).substr(7))
+    }
+
     const toDisplay: any[] = []
     gameState.allCurrentAnswersShuffled.forEach((answer: string, index: number) => {
+
+      // determine whether to show correct/incorrect answers
+      let answerBorder = ""
+      if (gameState.hasSubmittedAnswer) {
+        answerBorder = "answer-border-wrong"
+        if (answer === gameState.currentCorrectAnswer) {
+          answerBorder = "answer-border-correct"
+        }
+      }
+
       toDisplay.push(
-        <Form.Check 
-          type="radio"
-          id={`answer-${index}`}
-          label={`${parse(answer)}`}
-          className="mb-3"
-        />
+        <div key={`answer-${index}`} className={`${answerBorder} mb-3 px-3`}>
+          <Form.Check 
+            type="radio"
+            id={`answer-${index}`}
+            label={`${parse(answer)}`}
+            className="answer"
+            disabled={gameState.hasSubmittedAnswer}
+            onChange={handleChange}
+            checked={selectedAnswer === `${index}`}
+          />
+        </div>
       )
     })
     return (
-      <Form>
-        <div key={"answer-form"} className="mb-3">
-          {toDisplay}
-        </div>
-      </Form>
+      <>
+        <Form>
+          <div key={"answer-form"}>
+            {toDisplay}
+          </div>
+        </Form>
+        <UpdateRemainingPlayersButton gameState={gameState} selectedAnswer={selectedAnswer} />
+      </>
+    )
+  }
+
+  const UpdateRemainingPlayersButton = ({gameState, selectedAnswer}: any) => {
+    const [requestUpdateRemainingPlayers, setRequestUpdateRemainingPlayers] = useState(false)
+    const handleClick = () => {
+      setRequestUpdateRemainingPlayers(true)
+    }
+
+    useEffect(() => {
+      // Only make a call to remove the player if it is the wrong answer
+      const isWrong = gameState.allCurrentAnswersShuffled[selectedAnswer] !== gameState.currentCorrectAnswer
+
+      if (requestUpdateRemainingPlayers) {
+        dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, isWrong))
+      }
+    }, [requestUpdateRemainingPlayers])
+
+    return (
+      <Button
+        className="mt-5"
+        variant="primary"
+        size="lg"
+        onClick={!gameState.hasSubmittedAnswer ? () => {handleClick()} : undefined}
+        disabled={gameState.hasSubmittedAnswer}
+      >
+        {gameState.isUpdatingRemainingPlayers ? "Submitting..." : "Submit Answer"}
+      </Button>
     )
   }
 
   // The question area component
   const QuestionArea = ({gameState}: any) => {
     const [countdownTimer, setCountdownTimer] = useState(0)
-    const [startTime, setStartTime] = useState<number>(10)
+    const [startTime, setStartTime] = useState<number>(12)
 
     useEffect(() => {
         const countdownTimer: any = setInterval(()=>{setStartTime(calculateSecondsUntilDate(gameState.timeOfNextRound))}, 1000)

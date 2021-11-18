@@ -17,6 +17,18 @@ export type GET_GAME_SUCCEEDED = typeof GET_GAME_SUCCEEDED
 export const GET_GAME_FAILED = "GET_GAME_FAILED"
 export type GET_GAME_FAILED = typeof GET_GAME_FAILED
 
+export const UPDATE_REMAINING_PLAYERS_REQUESTED = "UPDATE_REMAINING_PLAYERS_REQUESTED"
+export type UPDATE_REMAINING_PLAYERS_REQUESTED = typeof UPDATE_REMAINING_PLAYERS_REQUESTED
+
+export const UPDATE_REMAINING_PLAYERS_SUCCEEDED = "UPDATE_REMAINING_PLAYERS_SUCCEEDED"
+export type UPDATE_REMAINING_PLAYERS_SUCCEEDED = typeof UPDATE_REMAINING_PLAYERS_SUCCEEDED
+
+export const UPDATE_REMAINING_PLAYERS_FAILED = "UPDATE_REMAINING_PLAYERS_FAILED"
+export type UPDATE_REMAINING_PLAYERS_FAILED = typeof UPDATE_REMAINING_PLAYERS_FAILED
+
+export const SELECTED_ANSWER_SET = "SELECTED_ANSWER_SET"
+export type SELECTED_ANSWER_SET = typeof SELECTED_ANSWER_SET
+
 export enum GameStatus {
   Done = "DONE",
   Unknown = "UNKNOWN",
@@ -38,6 +50,7 @@ export interface GameData {
   totalUsers: number
   remainingUsers: number[]
   requiredToStart: number
+  isUpdatingRemainingPlayers: boolean
 }
 
 export interface CreateNewGameRequested {
@@ -66,6 +79,23 @@ export interface GetGameFailed {
   type: GET_GAME_FAILED
 }
 
+export interface UpdateRemainingPlayersRequested {
+  type: UPDATE_REMAINING_PLAYERS_REQUESTED
+}
+
+export interface UpdateRemainingPlayersSucceeded {
+  type: UPDATE_REMAINING_PLAYERS_SUCCEEDED
+}
+
+export interface UpdateRemainingPlayersFailed {
+  type: UPDATE_REMAINING_PLAYERS_FAILED
+}
+
+export interface SelectedAnswerSet {
+  type: SELECTED_ANSWER_SET
+  answer: string
+}
+
 export type HomeAction =
 | CreateNewGameRequested
 | CreateNewGameSucceeded
@@ -73,3 +103,7 @@ export type HomeAction =
 | GetGameRequested
 | GetGameSucceeded
 | GetGameFailed
+| UpdateRemainingPlayersRequested
+| UpdateRemainingPlayersSucceeded
+| UpdateRemainingPlayersFailed
+| SelectedAnswerSet

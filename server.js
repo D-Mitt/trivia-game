@@ -6,6 +6,7 @@ const axios = require("axios")
 
 const app = express()
 const port = 5000
+const roundLength = 12000
 
 // Express only serves static assets in production
 if (process.env.NODE_ENV === "production") {
@@ -37,36 +38,55 @@ const setGameStarted = async (gameObject) => {
       currentQuestion: questionData.question, 
       currentCorrectAnswer: questionData.currentCorrectAnswer,
       currentIncorrectAnswers: questionData.currentIncorrectAnswers,
-       timeOfNextRound: new Date(Date.now() + 10000)
+      timeOfNextRound: new Date(Date.now() + roundLength)
     },
     { returning: true, where: { gameId: gameObject.gameId }// updated for multiplayer req.params.gameId }
-  }).then(function([ rowsUpdate, [updatedBook] ]) {
-    setTimeout(setUpNextRound, 10000, updatedBook)
+  }).then(function([ rowsUpdate, [updatedGame] ]) {
+    setTimeout(setUpNextRound, roundLength, updatedGame.gameId)
+  }).catch(err => {
+    res.status(500).send({
+      message:
+        err.message || "An error occurred while fetching the Game."
+    })
   })
 }
 
-const setUpNextRound = async (gameObject) => {
-  //TODO: if no remaining users, or 1 remaining user, end game
-  const questionData = await getQuestion()
-  db.Game.update(
-    { 
-      currentRound: gameObject.currentRound + 1, 
-      remainingUsers: [], 
-      currentQuestion: questionData.question, 
-      currentCorrectAnswer: questionData.currentCorrectAnswer,
-      currentIncorrectAnswers: questionData.currentIncorrectAnswers,
-      timeOfNextRound: new Date(Date.now() + 10000)
-    },
-    { returning: true, where: { gameId: gameObject.gameId }// updated for multiplayer req.params.gameId }
-  }).then(function([ rowsUpdate, [updatedBook] ]) {
-    setTimeout(setUpNextRound, 10000, updatedBook)
-  })
+const setUpNextRound = async (gameId) => {
+  db.Game.findOne({ where: { gameId: gameId } })
+    .then(async (data) => {
+      // if no remaining users, or 1 remaining user, end game
+      if (data.dataValues.remainingUsers.length <= 0) { //Change to 1
+        return db.Game.update(
+          { 
+            status: "DONE", 
+          },
+          { where: { gameId: gameId }
+        })
+      }
+
+      const questionData = await getQuestion()
+      return db.Game.update(
+        { 
+          currentRound: data.dataValues.currentRound + 1, 
+          currentQuestion: questionData.question, 
+          currentCorrectAnswer: questionData.currentCorrectAnswer,
+          currentIncorrectAnswers: questionData.currentIncorrectAnswers,
+          timeOfNextRound: new Date(Date.now() + roundLength)
+        },
+        { returning: true, where: { gameId: gameId }// updated for multiplayer req.params.gameId }
+      }).then(function([ rowsUpdate, [updatedGame] ]) {
+        setTimeout(setUpNextRound, roundLength, updatedGame.gameId)
+      })
+    })
 }
 
 // Questions pulled from Open Trivia DB (https://opentdb.com/)
 const getQuestion = async () => {
+
+  // Categories range from 9 - 32
+  const category = Math.floor((Math.random() * 23) + 9)
   let questionData = {}
-  const url = "https://opentdb.com/api.php?amount=1&category=9"
+  const url = `https://opentdb.com/api.php?amount=1&category=${category}`
   const response = await axios.get(url)
 
   questionData.question = response.data.results[0].question
@@ -81,14 +101,14 @@ app.post('/games', function (req, res) {
     gameId: uuid.v4(),
     nextUserId: 2,
     isWaitingForNextRound: true, //Change this to false for multiplayer
-    timeOfNextRound: new Date(Date.now() + 12000),// change this to new Date(), for multiplayer
+    timeOfNextRound: new Date(Date.now() + roundLength),// change this to new Date(), for multiplayer
     currentRound: 0,
     currentQuestion: "",
     currentIncorrectAnswers: [],
     currentCorrectAnswer: "",
     status: "WAITING",
     totalUsers: 1,
-    remainingUsers: [],
+    remainingUsers: [1],
     requiredToStart: 1 // Change this to 2 for multiplayer
   }
 
@@ -101,7 +121,7 @@ app.post('/games', function (req, res) {
       delete toReturn.nextUserId
 
       // Change the game data with 2 seconds to spare so that people joining late won't have issues
-      setTimeout(setGameStarted, 10000, toReturn)
+      setTimeout(setGameStarted, roundLength - 2000, toReturn)
 
       return res.status(201).json(toReturn).end()
     })
@@ -121,7 +141,34 @@ app.get('/games/:gameId', function (req, res) {
     .catch(err => {
       res.status(500).send({
         message:
-          err.message || "An error occurred while creating the Game."
+          err.message || "An error occurred while fetching the Game."
+      })
+    })
+})
+
+app.post('/games/:gameId/remainingPlayers/:userId', function (req, res) {
+  db.Game.findOne({ where: { gameId: req.params.gameId } })
+    .then((data) => {
+      //remove userId from remaining user list
+      const isNotUserId = (value) => { 
+        return value.toString() !== req.params.userId 
+      }
+
+      let newRemainingUser = data.dataValues.remainingUsers.filter(isNotUserId)
+      return db.Game.update(
+        { 
+          remainingUsers: newRemainingUser, 
+        },
+        { where: { gameId: req.params.gameId }
+      })
+    })
+    .then(() => {
+      return res.status(204).end()
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "An error occurred while updating the remaining players"
       })
     })
 })

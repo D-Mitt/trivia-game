@@ -18,6 +18,11 @@ export interface State {
     totalUsers: number
     remainingUsers: number[]
     requiredToStart: number
+    isUpdatingRemainingPlayers: boolean
+    hasSubmittedAnswer: boolean
+    selectedAnswer: string
+    hasPlayerLost: boolean
+    hasPlayerWon: boolean
   }
 }
 
@@ -36,7 +41,12 @@ const initialState: State = {
     status: GameStatus.Unknown,
     totalUsers: 0,
     remainingUsers: [0],
-    requiredToStart: 2
+    requiredToStart: 2,
+    isUpdatingRemainingPlayers: false,
+    hasSubmittedAnswer: false,
+    selectedAnswer: "",
+    hasPlayerLost: false,
+    hasPlayerWon: false
   }
 }
 
