@@ -68,7 +68,7 @@ const Game = () => {
   }
 
   // The waiting area component
-  const WaitingArea = ({gameStartCheckId, gameState}: any) => {
+  const WaitingArea = ({gameStartCheckId}: any) => {
     const [shouldGameStartCheckIdBeCancelled, setShouldGameStartCheckIdBeCancelled] = useState(false)
     const [countdownTimer, setCountdownTimer] = useState(0)
     const [startTime, setStartTime] = useState<number>(gameState.isSolo ? 5 : 12)
@@ -126,11 +126,6 @@ const Game = () => {
       if (shouldCountdownTimerBeCancelled) {
         clearInterval(countdownTimer)
         fetchGame()
-
-        // // If we have not submitted an answer, remove player from the game
-        // if (!gameState.hasSubmittedAnswer) {
-        //  dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, true))
-        // }
       }
     }, [shouldCountdownTimerBeCancelled])
 
@@ -151,7 +146,7 @@ const Game = () => {
     )
   }
 
-  const Answers = ({gameState}: any) => {
+  const Answers = () => {
     // default to none of the choices selected
     const [selectedAnswer, setSelectedAnswer] = useState("")
     const handleChange = (event: any) => {
@@ -192,12 +187,12 @@ const Game = () => {
             {toDisplay}
           </div>
         </Form>
-        <UpdateRemainingPlayersButton gameState={gameState} selectedAnswer={selectedAnswer} />
+        <UpdateRemainingPlayersButton selectedAnswer={selectedAnswer} />
       </>
     )
   }
 
-  const UpdateRemainingPlayersButton = ({gameState, selectedAnswer}: any) => {
+  const UpdateRemainingPlayersButton = ({selectedAnswer}: any) => {
     const [requestUpdateRemainingPlayers, setRequestUpdateRemainingPlayers] = useState(false)
     const handleClick = () => {
       setRequestUpdateRemainingPlayers(true)
@@ -226,7 +221,7 @@ const Game = () => {
   }
 
   // The question area component
-  const QuestionArea = ({gameState}: any) => {
+  const QuestionArea = () => {
     const [countdownTimer, setCountdownTimer] = useState(0)
     const [startTime, setStartTime] = useState<number>(12)
 
@@ -247,12 +242,12 @@ const Game = () => {
           {`${parse(gameState.currentQuestion)}`}
         </div>
         <TimeToAnswerCountdown startTime={startTime} countdownTimer={countdownTimer}/>
-        <Answers gameState={gameState}/>
+        <Answers />
       </div>
     )
   }
 
-  const EndScreen = ({gameState}: any) => {    
+  const EndScreen = () => {    
     const FindGameButton = () => {
 
       return (
@@ -286,13 +281,13 @@ const Game = () => {
   }
   
   if (gameState.status === GameStatus.Waiting) {
-    return <WaitingArea gameStartCheckId={gameStartCheckId} gameState={gameState} />
+    return <WaitingArea gameStartCheckId={gameStartCheckId} />
   } else if (gameState.status === GameStatus.Started) {
-    return <QuestionArea gameState={gameState} />
+    return <QuestionArea />
   } else   if (gameState.status === GameStatus.Done || gameState.hasPlayerLost) {
     // Assumption is that if player won, game will be in the done state.
     // You can lose, but the game will still continue on for others
-    return <EndScreen gameState={gameState} />
+    return <EndScreen />
   }
 
   return null
