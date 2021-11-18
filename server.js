@@ -55,7 +55,7 @@ const setUpNextRound = async (gameId) => {
   db.Game.findOne({ where: { gameId: gameId } })
     .then(async (data) => {
       // if no remaining users, or 1 remaining user, end game
-      if (data.dataValues.remainingUsers.length <= 0) { //Change to 1
+      if (data.dataValues.remainingUsers.length <= 1) {
         return db.Game.update(
           { 
             status: "DONE", 

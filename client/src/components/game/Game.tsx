@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button"
 import Form from "react-bootstrap/Form"
 import Spinner from "react-bootstrap/Spinner"
 import { useDispatch, useSelector } from "react-redux"
+import { BASE_URL } from "../../constants"
 import { getGame, updateRemainingPlayers } from "../../store/game/GameActions"
 import { GameStatus } from "../../store/game/GameConstants"
 import { State } from "../../store/store"
@@ -14,6 +15,7 @@ const Game = () => {
   // Set up game state
   const gameState = useSelector((state: State) => state.game)
   const dispatch = useDispatch()
+  // const navigate = useNavigate()
   const [gameStartCheckId, setGameStartCheckId] = useState(0)
 
   // On component mount, start interval that checks for game state/status
@@ -60,7 +62,7 @@ const Game = () => {
       plural = "second"
     }
     return (
-      <div className="round-start mb-5">
+      <div className="alerting mb-5">
         {gameState.isWaitingForNextRound ? `Game starting in ${startTime} ${plural}` : ""}
       </div>
     )
@@ -102,7 +104,7 @@ const Game = () => {
             </Spinner>
           </div>
           <div className="waiting-message">
-            {`Waiting for at least ${required} more...`}
+            {required === 0 ? "Waiting for any stragglers..." : `Waiting for at least ${required} more...`}
           </div>
         </div>
       </div>
@@ -116,10 +118,16 @@ const Game = () => {
       if (shouldCountdownTimerBeCancelled) {
         clearInterval(countdownTimer)
         fetchGame()
+
+        // If we have not submitted an answer, remove player from the game
+        if (!gameState.hasSubmittedAnswer) {
+         dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, true))
+        //  navigate("/end")
+        }
       }
     }, [shouldCountdownTimerBeCancelled])
 
-    // If the game is starting, then stop the interval timer and get the new game state
+    // If theround is over, then stop the interval timer and get the new game state
     if (startTime <= 0 && !shouldCountdownTimerBeCancelled) {
       setShouldCountdownTimerBeCancelled(true)
     }
@@ -130,7 +138,7 @@ const Game = () => {
 
     // TODO: change color based on how much time is left
     return (
-      <div className="round-start mb-5">
+      <div className="alerting mb-5">
         {`${startTime} ${plural} left to answer!`}
       </div>
     )
@@ -199,7 +207,7 @@ const Game = () => {
     return (
       <Button
         className="mt-5"
-        variant="primary"
+        variant="success"
         size="lg"
         onClick={!gameState.hasSubmittedAnswer ? () => {handleClick()} : undefined}
         disabled={gameState.hasSubmittedAnswer}
@@ -235,12 +243,53 @@ const Game = () => {
       </div>
     )
   }
+
+  const EndScreen = ({gameState}: any) => {    
+    const FindGameButton = () => {
+
+      return (
+        <Button
+          className="mt-5"
+          variant="success"
+          size="lg"
+          href={BASE_URL}
+        >
+          Home
+        </Button>
+      )
+    }
+
+    return (
+      <div>
+        {gameState.hasPlayerWon ? 
+        <div className="mt-5 win">
+          Congratulations, you won!
+        </div>
+        :
+        <div className="mt-5 alerting">
+          Oh no, you lost!
+        </div>}
+        <div className="description mt-3">
+          Compete with other players to see who can correctly answer the most questions.
+        </div>
+        <div className="description mt-3">
+        Play again?
+        </div>
+        <FindGameButton />
+      </div>
+    )
+  }
   
   if (gameState.status === GameStatus.Waiting) {
     return <WaitingArea gameStartCheckId={gameStartCheckId} gameState={gameState} />
   } else if (gameState.status === GameStatus.Started) {
     return <QuestionArea gameState={gameState} />
+  } else   if (gameState.status === GameStatus.Done || gameState.hasPlayerLost) {
+    // Assumption is that if player won, game will be in the done state.
+    // You can lose, but the game will still continue on for others
+    return <EndScreen gameState={gameState} />
   }
+
   return null
 }
 
