@@ -1,8 +1,8 @@
 import { NIL as NIL_UUID } from "uuid"
 import {
-  CREATE_NEW_GAME_FAILED,
-  CREATE_NEW_GAME_REQUESTED,
-  CREATE_NEW_GAME_SUCCEEDED,
+  CREATE_NEW_SOLO_GAME_FAILED,
+  CREATE_NEW_SOLO_GAME_REQUESTED,
+  CREATE_NEW_SOLO_GAME_SUCCEEDED,
   GameStatus,
   GET_GAME_SUCCEEDED,
   HomeAction,
@@ -65,20 +65,21 @@ const gameReducer = (
     hasSubmittedAnswer: false,
     selectedAnswer: "",
     hasPlayerLost: false,
-    hasPlayerWon: false
+    hasPlayerWon: false,
+    isSolo: true,
   },
   action: HomeAction
 ) => {
   let newState = state
 
   switch (action.type) {
-    case CREATE_NEW_GAME_REQUESTED:
+    case CREATE_NEW_SOLO_GAME_REQUESTED:
       newState = {
         ...newState,
         isSearchingForGame: true,
       }
       break
-    case CREATE_NEW_GAME_SUCCEEDED:
+    case CREATE_NEW_SOLO_GAME_SUCCEEDED:
       newState = {
         ...newState,
         isSearchingForGame: false,
@@ -98,7 +99,8 @@ const gameReducer = (
         hasSubmittedAnswer: false,
         selectedAnswer: "",
         hasPlayerLost: false,
-        hasPlayerWon: false
+        hasPlayerWon: false,
+        isSolo: action.gameData.isSolo
       }
       break
     case GET_GAME_SUCCEEDED:
@@ -123,7 +125,7 @@ const gameReducer = (
         selectedAnswer: "",
       }
       break
-    case CREATE_NEW_GAME_FAILED:
+    case CREATE_NEW_SOLO_GAME_FAILED:
       newState = {
         ...newState,
         isSearchingForGame: false,
@@ -143,7 +145,8 @@ const gameReducer = (
         isUpdatingRemainingPlayers: false,
         hasSubmittedAnswer: false,
         hasPlayerLost: false,
-        hasPlayerWon: false
+        hasPlayerWon: false,
+        isSolo: false
       }
       break
     case UPDATE_REMAINING_PLAYERS_REQUESTED:

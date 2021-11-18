@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button"
 import { useDispatch, useSelector } from "react-redux"
 import { Navigate } from "react-router-dom"
 import { NIL as NIL_UUID } from "uuid"
-import { createNewGame } from "../../store/game/GameActions"
+import { createNewSoloGame } from "../../store/game/GameActions"
 import { State } from "../../store/store"
 import "../../stylesheets/home.css"
 
@@ -20,16 +20,16 @@ const Home = () => {
   
   // Component that starts a game
   const FindGameButton = () => {
-    const [requestCreateNewGame, setRequestCreateNewGame] = useState(false)
+    const [requestCreateNewSoloGame, setRequestCreateNewSoloGame] = useState(false)
     const handleClick = useCallback(() => {
-      setRequestCreateNewGame(true)
-    }, [requestCreateNewGame])
+      setRequestCreateNewSoloGame(true)
+    }, [requestCreateNewSoloGame])
 
     useEffect(() => {
-      if (requestCreateNewGame) {
-        dispatch(createNewGame())
+      if (requestCreateNewSoloGame) {
+        dispatch(createNewSoloGame())
       }
-    }, [requestCreateNewGame])
+    }, [requestCreateNewSoloGame])
 
     return (
       <Button

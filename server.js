@@ -7,6 +7,7 @@ const axios = require("axios")
 const app = express()
 const port = 5000
 const roundLength = 12000
+const soloGameStartTime = 5000
 
 // Express only serves static assets in production
 if (process.env.NODE_ENV === "production") {
@@ -38,9 +39,9 @@ const setGameStarted = async (gameObject) => {
       currentQuestion: questionData.question, 
       currentCorrectAnswer: questionData.currentCorrectAnswer,
       currentIncorrectAnswers: questionData.currentIncorrectAnswers,
-      timeOfNextRound: new Date(Date.now() + roundLength)
+      timeOfNextRound: new Date(Date.now() + roundLength),
     },
-    { returning: true, where: { gameId: gameObject.gameId }// updated for multiplayer req.params.gameId }
+    { returning: true, where: { gameId: gameObject.gameId }
   }).then(function([ rowsUpdate, [updatedGame] ]) {
     setTimeout(setUpNextRound, roundLength, updatedGame.gameId)
   }).catch(err => {
@@ -54,8 +55,11 @@ const setGameStarted = async (gameObject) => {
 const setUpNextRound = async (gameId) => {
   db.Game.findOne({ where: { gameId: gameId } })
     .then(async (data) => {
-      // if no remaining users, or 1 remaining user, end game
-      if (data.dataValues.remainingUsers.length <= 1) {
+      // If no remaining users, or 1 remaining user, end game.
+      // For solo games, we want it to continue until they lose
+      const remainingUsersGameOver = data.dataValues.isSolo ? 0 : 1
+
+      if (data.dataValues.remainingUsers.length <= remainingUsersGameOver) {
         return db.Game.update(
           { 
             status: "DONE", 
@@ -73,7 +77,7 @@ const setUpNextRound = async (gameId) => {
           currentIncorrectAnswers: questionData.currentIncorrectAnswers,
           timeOfNextRound: new Date(Date.now() + roundLength)
         },
-        { returning: true, where: { gameId: gameId }// updated for multiplayer req.params.gameId }
+        { returning: true, where: { gameId: gameId }
       }).then(function([ rowsUpdate, [updatedGame] ]) {
         setTimeout(setUpNextRound, roundLength, updatedGame.gameId)
       })
@@ -96,12 +100,13 @@ const getQuestion = async () => {
   return questionData
 }
 
-app.post('/games', function (req, res) {
+// Allows a user to play solo, until they lose
+app.post('/soloGames', function (req, res) {
   let newGame = {
     gameId: uuid.v4(),
     nextUserId: 2,
     isWaitingForNextRound: true, //Change this to false for multiplayer
-    timeOfNextRound: new Date(Date.now() + roundLength),// change this to new Date(), for multiplayer
+    timeOfNextRound: new Date(Date.now() + soloGameStartTime),// change this to new Date(), for multiplayer
     currentRound: 0,
     currentQuestion: "",
     currentIncorrectAnswers: [],
@@ -109,7 +114,47 @@ app.post('/games', function (req, res) {
     status: "WAITING",
     totalUsers: 1,
     remainingUsers: [1],
-    requiredToStart: 1 // Change this to 2 for multiplayer
+    requiredToStart: 1, // Change this to 2 for multiplayer
+    isSolo: true
+  }
+
+  db.Game.create(newGame)
+    .then(() => {
+      let toReturn = {
+        ...newGame,
+        userId: 1,
+      }
+      delete toReturn.nextUserId
+
+      // Change the game data with 2 seconds to spare so that people joining late won't have issues
+      setTimeout(setGameStarted, soloGameStartTime - 2000, toReturn)
+
+      return res.status(201).json(toReturn).end()
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "An error occurred while creating the Game."
+      })
+    })
+})
+
+// Create a game that requires at least one other use to join
+app.post('/games', function (req, res) {
+  let newGame = {
+    gameId: uuid.v4(),
+    nextUserId: 2,
+    isWaitingForNextRound: false,
+    timeOfNextRound: new Date(),
+    currentRound: 0,
+    currentQuestion: "",
+    currentIncorrectAnswers: [],
+    currentCorrectAnswer: "",
+    status: "WAITING",
+    totalUsers: 1,
+    remainingUsers: [1],
+    requiredToStart: 2,
+    isSolo: false
   }
 
   db.Game.create(newGame)

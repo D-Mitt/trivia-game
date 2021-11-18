@@ -35,9 +35,8 @@ const Game = () => {
 
   // Helper function that takes a JSON date and compares it to the current date to calculate the number of seconds before a new round starts
   const calculateSecondsUntilDate = (date: Date): number => {
-    // Calculate time until next round starts
     const currentTime = Date.now()
-    // Get the the string of the JSONified date, create a date object with tat string and then get the value
+    // Get the the string of the JSONified date, create a date object with that string and then get the value
     const roundStartTime = new Date(JSON.parse(JSON.stringify(date))).valueOf()
     // convert to seconds, rounded up to whole number
     return Math.ceil((Math.max(0, roundStartTime - currentTime)) / 1000)
@@ -72,8 +71,9 @@ const Game = () => {
   const WaitingArea = ({gameStartCheckId, gameState}: any) => {
     const [shouldGameStartCheckIdBeCancelled, setShouldGameStartCheckIdBeCancelled] = useState(false)
     const [countdownTimer, setCountdownTimer] = useState(0)
-    const [startTime, setStartTime] = useState<number>(12)
+    const [startTime, setStartTime] = useState<number>(gameState.isSolo ? 5 : 12)
 
+    // Clear the game start timer and start the round timer
     useEffect(() => {
       if (shouldGameStartCheckIdBeCancelled) {
         clearInterval(gameStartCheckId)
@@ -97,16 +97,23 @@ const Game = () => {
           {`You are Player #${gameState.userId}`}
         </div>
         <GameStartCountdown startTime={startTime} countdownTimer={countdownTimer}/>
-        <div className="d-flex">
-          <div>
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </div>
+        {
+          gameState.isSolo ?
           <div className="waiting-message">
-            {required === 0 ? "Waiting for any stragglers..." : `Waiting for at least ${required} more...`}
+            Enjoy your solo game!
           </div>
-        </div>
+          :
+          <div className="d-flex">
+            <div>
+              <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            </div>
+            <div className="waiting-message">
+              {required === 0 ? "Waiting for any stragglers..." : `Waiting for at least ${required} more...`}
+            </div>
+          </div>
+        }
       </div>
     )
   }
@@ -122,7 +129,6 @@ const Game = () => {
         // If we have not submitted an answer, remove player from the game
         if (!gameState.hasSubmittedAnswer) {
          dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, true))
-        //  navigate("/end")
         }
       }
     }, [shouldCountdownTimerBeCancelled])
@@ -136,7 +142,7 @@ const Game = () => {
       plural = "second"
     }
 
-    // TODO: change color based on how much time is left
+    // TODO: potentially change color based on how much time is left
     return (
       <div className="alerting mb-5">
         {`${startTime} ${plural} left to answer!`}
@@ -270,10 +276,7 @@ const Game = () => {
           Oh no, you lost!
         </div>}
         <div className="description mt-3">
-          Compete with other players to see who can correctly answer the most questions.
-        </div>
-        <div className="description mt-3">
-        Play again?
+          Play again?
         </div>
         <FindGameButton />
       </div>

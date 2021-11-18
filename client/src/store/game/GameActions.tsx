@@ -2,12 +2,12 @@ import axios from "axios"
 import { Dispatch } from "redux"
 import { BASE_URL } from "../../constants"
 import {
-  CreateNewGameFailed,
-  CreateNewGameRequested,
-  CreateNewGameSucceeded,
-  CREATE_NEW_GAME_FAILED,
-  CREATE_NEW_GAME_REQUESTED,
-  CREATE_NEW_GAME_SUCCEEDED,
+  CreateNewSoloGameFailed,
+  CreateNewSoloGameRequested,
+  CreateNewSoloGameSucceeded,
+  CREATE_NEW_SOLO_GAME_FAILED,
+  CREATE_NEW_SOLO_GAME_REQUESTED,
+  CREATE_NEW_SOLO_GAME_SUCCEEDED,
   GameData,
   GetGameFailed,
   GetGameRequested,
@@ -22,22 +22,22 @@ import {
   UPDATE_REMAINING_PLAYERS_SUCCEEDED
 } from "./GameConstants"
 
-export const createNewGameRequested = (): CreateNewGameRequested => {
+export const createNewSoloGameRequested = (): CreateNewSoloGameRequested => {
   return {
-    type: CREATE_NEW_GAME_REQUESTED,
+    type: CREATE_NEW_SOLO_GAME_REQUESTED,
   }
 }
 
-export const createNewGameSucceeded = (gameData: GameData): CreateNewGameSucceeded => {
+export const createNewSoloGameSucceeded = (gameData: GameData): CreateNewSoloGameSucceeded => {
   return {
-    type: CREATE_NEW_GAME_SUCCEEDED,
+    type: CREATE_NEW_SOLO_GAME_SUCCEEDED,
     gameData: gameData,
   }
 }
 
-export const createNewGameFailed = (): CreateNewGameFailed => {
+export const createNewSoloGameFailed = (): CreateNewSoloGameFailed => {
   return {
-    type: CREATE_NEW_GAME_FAILED,
+    type: CREATE_NEW_SOLO_GAME_FAILED,
   }
 }
 
@@ -85,16 +85,16 @@ export const selectedAnswerSet = (answer: string): SelectedAnswerSet => {
   }
 }
 
-export const createNewGame = () => {
+export const createNewSoloGame = () => {
   return async (dispatch: Dispatch<HomeAction>) => {
-    dispatch(createNewGameRequested())
+    dispatch(createNewSoloGameRequested())
     try {
       // Could be filled with game config in future updates
       const body = {}
-      const response = await axios.post(`${BASE_URL}/games`, body)
-      dispatch(createNewGameSucceeded(response.data))
+      const response = await axios.post(`${BASE_URL}/soloGames`, body)
+      dispatch(createNewSoloGameSucceeded(response.data))
     } catch (error) {
-      dispatch(createNewGameFailed())
+      dispatch(createNewSoloGameFailed())
     }
   }
 }

@@ -23,6 +23,7 @@ export interface State {
     selectedAnswer: string
     hasPlayerLost: boolean
     hasPlayerWon: boolean
+    isSolo: boolean
   }
 }
 
@@ -46,7 +47,8 @@ const initialState: State = {
     hasSubmittedAnswer: false,
     selectedAnswer: "",
     hasPlayerLost: false,
-    hasPlayerWon: false
+    hasPlayerWon: false,
+    isSolo: false
   }
 }
 

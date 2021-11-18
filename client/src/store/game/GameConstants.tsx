@@ -1,12 +1,12 @@
 
-export const CREATE_NEW_GAME_REQUESTED = "CREATE_NEW_GAME_REQUESTED"
-export type CREATE_NEW_GAME_REQUESTED = typeof CREATE_NEW_GAME_REQUESTED
+export const CREATE_NEW_SOLO_GAME_REQUESTED = "CREATE_NEW_SOLO_GAME_REQUESTED"
+export type CREATE_NEW_SOLO_GAME_REQUESTED = typeof CREATE_NEW_SOLO_GAME_REQUESTED
 
-export const CREATE_NEW_GAME_SUCCEEDED = "CREATE_NEW_GAME_SUCCEEDED"
-export type CREATE_NEW_GAME_SUCCEEDED = typeof CREATE_NEW_GAME_SUCCEEDED
+export const CREATE_NEW_SOLO_GAME_SUCCEEDED = "CREATE_NEW_SOLO_GAME_SUCCEEDED"
+export type CREATE_NEW_SOLO_GAME_SUCCEEDED = typeof CREATE_NEW_SOLO_GAME_SUCCEEDED
 
-export const CREATE_NEW_GAME_FAILED = "CREATE_NEW_GAME_FAILED"
-export type CREATE_NEW_GAME_FAILED = typeof CREATE_NEW_GAME_FAILED
+export const CREATE_NEW_SOLO_GAME_FAILED = "CREATE_NEW_SOLO_GAME_FAILED"
+export type CREATE_NEW_SOLO_GAME_FAILED = typeof CREATE_NEW_SOLO_GAME_FAILED
 
 export const GET_GAME_REQUESTED = "GET_GAME_REQUESTED"
 export type GET_GAME_REQUESTED = typeof GET_GAME_REQUESTED
@@ -51,19 +51,20 @@ export interface GameData {
   remainingUsers: number[]
   requiredToStart: number
   isUpdatingRemainingPlayers: boolean
+  isSolo: boolean
 }
 
-export interface CreateNewGameRequested {
-  type: CREATE_NEW_GAME_REQUESTED
+export interface CreateNewSoloGameRequested {
+  type: CREATE_NEW_SOLO_GAME_REQUESTED
 }
 
-export interface CreateNewGameSucceeded {
-  type: CREATE_NEW_GAME_SUCCEEDED
+export interface CreateNewSoloGameSucceeded {
+  type: CREATE_NEW_SOLO_GAME_SUCCEEDED
   gameData: GameData
 }
 
-export interface CreateNewGameFailed {
-  type: CREATE_NEW_GAME_FAILED
+export interface CreateNewSoloGameFailed {
+  type: CREATE_NEW_SOLO_GAME_FAILED
 }
 
 export interface GetGameRequested {
@@ -97,9 +98,9 @@ export interface SelectedAnswerSet {
 }
 
 export type HomeAction =
-| CreateNewGameRequested
-| CreateNewGameSucceeded
-| CreateNewGameFailed
+| CreateNewSoloGameRequested
+| CreateNewSoloGameSucceeded
+| CreateNewSoloGameFailed
 | GetGameRequested
 | GetGameSucceeded
 | GetGameFailed
