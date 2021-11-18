@@ -127,10 +127,10 @@ const Game = () => {
         clearInterval(countdownTimer)
         fetchGame()
 
-        // If we have not submitted an answer, remove player from the game
-        if (!gameState.hasSubmittedAnswer) {
-         dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, true))
-        }
+        // // If we have not submitted an answer, remove player from the game
+        // if (!gameState.hasSubmittedAnswer) {
+        //  dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, true))
+        // }
       }
     }, [shouldCountdownTimerBeCancelled])
 
@@ -204,11 +204,11 @@ const Game = () => {
     }
 
     useEffect(() => {
-      // Only make a call to remove the player if it is the wrong answer
-      const isWrong = gameState.allCurrentAnswersShuffled[selectedAnswer] !== gameState.currentCorrectAnswer
+      // Only keep the player if it is the correct answer
+      const isCorrect = gameState.allCurrentAnswersShuffled[selectedAnswer] === gameState.currentCorrectAnswer
 
       if (requestUpdateRemainingPlayers) {
-        dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, isWrong))
+        dispatch(updateRemainingPlayers(gameState.gameId, gameState.userId, isCorrect))
       }
     }, [requestUpdateRemainingPlayers])
 

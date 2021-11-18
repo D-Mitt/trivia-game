@@ -40,6 +40,8 @@ const setGameStarted = async (gameObject) => {
       currentCorrectAnswer: questionData.currentCorrectAnswer,
       currentIncorrectAnswers: questionData.currentIncorrectAnswers,
       timeOfNextRound: new Date(Date.now() + roundLength),
+      remainingUsers: [],
+      usersWithCorrectAnswer: [],
     },
     { returning: true, where: { gameId: gameObject.gameId }
   }).then(function([ rowsUpdate, [updatedGame] ]) {
@@ -59,10 +61,11 @@ const setUpNextRound = async (gameId) => {
       // For solo games, we want it to continue until they lose
       const remainingUsersGameOver = data.dataValues.isSolo ? 0 : 1
 
-      if (data.dataValues.remainingUsers.length <= remainingUsersGameOver) {
+      if (data.dataValues.usersWithCorrectAnswer.length <= remainingUsersGameOver) {
         return db.Game.update(
           { 
-            status: "DONE", 
+            status: "DONE",
+            remainingUsers: data.dataValues.isSolo ? [] : [...data.dataValues.usersWithCorrectAnswer]
           },
           { where: { gameId: gameId }
         })
@@ -75,7 +78,9 @@ const setUpNextRound = async (gameId) => {
           currentQuestion: questionData.question, 
           currentCorrectAnswer: questionData.currentCorrectAnswer,
           currentIncorrectAnswers: questionData.currentIncorrectAnswers,
-          timeOfNextRound: new Date(Date.now() + roundLength)
+          timeOfNextRound: new Date(Date.now() + roundLength),
+          remainingUsers: [...data.dataValues.usersWithCorrectAnswer],
+          usersWithCorrectAnswer: [], // reset who has submitted answers
         },
         { returning: true, where: { gameId: gameId }
       }).then(function([ rowsUpdate, [updatedGame] ]) {
@@ -143,7 +148,6 @@ app.post('/soloGames', function (req, res) {
 app.post('/games', function (req, res) {
   db.Game.findOne({where: { status: "WAITING" }})
   .then((game) => {
-    console.log("game: ", game)
     // If no games are in waiting status, make a new one
     if (game === null) {
       const newGame = {
@@ -180,14 +184,21 @@ app.post('/games', function (req, res) {
       { returning: true, where: { gameId: game.dataValues.gameId }
     })
     .then(function([ rowsUpdate, [updatedGame] ]) {
-          // Change the game data with 2 seconds to spare so that people joining late won't have issues
-      setTimeout(setGameStarted, roundLength - 2000, updatedGame)
+      // Change the game data with 2 seconds to spare so that people joining late won't have issues
+      // Only set the timer if it is the user reaching the required number for starting
+      if (updatedGame.dataValues.totalUsers === updatedGame.dataValues.requiredToStart) {
+        setTimeout(setGameStarted, roundLength - 2000, updatedGame)
+      }
       return {...updatedGame.dataValues, userId: userId}
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "An error occurred while creating the Game."
+      })
     })
   })
   .then((game) => {
-
-    console.log("LAST GAME: ", game)
     let toReturn = {
       ...game,
     }
@@ -216,18 +227,14 @@ app.get('/games/:gameId', function (req, res) {
     })
 })
 
+// Keep player in the game by adding them to the list of players who answered correctly.
+// This list will be transferred to the remaining players list at the end of the round.
 app.post('/games/:gameId/remainingPlayers/:userId', function (req, res) {
   db.Game.findOne({ where: { gameId: req.params.gameId } })
     .then((data) => {
-      //remove userId from remaining user list
-      const isNotUserId = (value) => { 
-        return value.toString() !== req.params.userId 
-      }
-
-      let newRemainingUser = data.dataValues.remainingUsers.filter(isNotUserId)
       return db.Game.update(
         { 
-          remainingUsers: newRemainingUser, 
+          usersWithCorrectAnswer: [...data.dataValues.usersWithCorrectAnswer, req.params.userId], 
         },
         { where: { gameId: req.params.gameId }
       })

@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     totalUsers: DataTypes.INTEGER,
     remainingUsers: DataTypes.ARRAY(DataTypes.STRING),
+    usersWithCorrectAnswer: DataTypes.ARRAY(DataTypes.STRING),
     requiredToStart: DataTypes.INTEGER,
     isSolo: DataTypes.BOOLEAN
   }, {

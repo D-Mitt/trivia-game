@@ -142,11 +142,11 @@ export const getGame = (gameId: string) => {
   }
 }
 
-export const updateRemainingPlayers = (gameId: string, userId: number, isWrong: boolean) => {
+export const updateRemainingPlayers = (gameId: string, userId: number, isCorrect: boolean) => {
   return async (dispatch: Dispatch<GameAction>) => {
     dispatch(updateRemainingPlayersRequested())
     try {
-      if (isWrong) {
+      if (isCorrect) {
         await axios.post(`${BASE_URL}/games/${gameId}/remainingPlayers/${userId}`, {})
       }
       dispatch(updateRemainingPlayersSucceeded())
