@@ -8,6 +8,15 @@ export type CREATE_NEW_SOLO_GAME_SUCCEEDED = typeof CREATE_NEW_SOLO_GAME_SUCCEED
 export const CREATE_NEW_SOLO_GAME_FAILED = "CREATE_NEW_SOLO_GAME_FAILED"
 export type CREATE_NEW_SOLO_GAME_FAILED = typeof CREATE_NEW_SOLO_GAME_FAILED
 
+export const JOIN_MULTIPLAYER_GAME_REQUESTED = "JOIN_MULTIPLAYER_GAME_REQUESTED"
+export type JOIN_MULTIPLAYER_GAME_REQUESTED = typeof JOIN_MULTIPLAYER_GAME_REQUESTED
+
+export const JOIN_MULTIPLAYER_GAME_SUCCEEDED = "JOIN_MULTIPLAYER_GAME_SUCCEEDED"
+export type JOIN_MULTIPLAYER_GAME_SUCCEEDED = typeof JOIN_MULTIPLAYER_GAME_SUCCEEDED
+
+export const JOIN_MULTIPLAYER_GAME_FAILED = "JOIN_MULTIPLAYER_GAME_FAILED"
+export type JOIN_MULTIPLAYER_GAME_FAILED = typeof JOIN_MULTIPLAYER_GAME_FAILED
+
 export const GET_GAME_REQUESTED = "GET_GAME_REQUESTED"
 export type GET_GAME_REQUESTED = typeof GET_GAME_REQUESTED
 
@@ -67,6 +76,19 @@ export interface CreateNewSoloGameFailed {
   type: CREATE_NEW_SOLO_GAME_FAILED
 }
 
+export interface JoinMultiplayerGameRequested {
+  type: JOIN_MULTIPLAYER_GAME_REQUESTED
+}
+
+export interface JoinMultiplayerGameSucceeded {
+  type: JOIN_MULTIPLAYER_GAME_SUCCEEDED
+  gameData: GameData
+}
+
+export interface JoinMultiplayerGameFailed {
+  type: JOIN_MULTIPLAYER_GAME_FAILED
+}
+
 export interface GetGameRequested {
   type: GET_GAME_REQUESTED
 }
@@ -97,10 +119,13 @@ export interface SelectedAnswerSet {
   answer: string
 }
 
-export type HomeAction =
+export type GameAction =
 | CreateNewSoloGameRequested
 | CreateNewSoloGameSucceeded
 | CreateNewSoloGameFailed
+| JoinMultiplayerGameRequested
+| JoinMultiplayerGameSucceeded
+| JoinMultiplayerGameFailed
 | GetGameRequested
 | GetGameSucceeded
 | GetGameFailed

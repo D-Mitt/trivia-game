@@ -7,15 +7,13 @@ import {
   CreateNewSoloGameSucceeded,
   CREATE_NEW_SOLO_GAME_FAILED,
   CREATE_NEW_SOLO_GAME_REQUESTED,
-  CREATE_NEW_SOLO_GAME_SUCCEEDED,
-  GameData,
+  CREATE_NEW_SOLO_GAME_SUCCEEDED, GameAction, GameData,
   GetGameFailed,
   GetGameRequested,
   GetGameSucceeded,
   GET_GAME_FAILED,
   GET_GAME_REQUESTED,
-  GET_GAME_SUCCEEDED,
-  HomeAction, SelectedAnswerSet, SELECTED_ANSWER_SET, UpdateRemainingPlayersFailed,
+  GET_GAME_SUCCEEDED, JoinMultiplayerGameFailed, JoinMultiplayerGameRequested, JoinMultiplayerGameSucceeded, JOIN_MULTIPLAYER_GAME_FAILED, JOIN_MULTIPLAYER_GAME_REQUESTED, JOIN_MULTIPLAYER_GAME_SUCCEEDED, SelectedAnswerSet, SELECTED_ANSWER_SET, UpdateRemainingPlayersFailed,
   UpdateRemainingPlayersRequested,
   UpdateRemainingPlayersSucceeded, UPDATE_REMAINING_PLAYERS_FAILED,
   UPDATE_REMAINING_PLAYERS_REQUESTED,
@@ -38,6 +36,25 @@ export const createNewSoloGameSucceeded = (gameData: GameData): CreateNewSoloGam
 export const createNewSoloGameFailed = (): CreateNewSoloGameFailed => {
   return {
     type: CREATE_NEW_SOLO_GAME_FAILED,
+  }
+}
+
+export const joinMultiplayerGameRequested = (): JoinMultiplayerGameRequested => {
+  return {
+    type: JOIN_MULTIPLAYER_GAME_REQUESTED,
+  }
+}
+
+export const joinMultiplayerGameSucceeded = (gameData: GameData): JoinMultiplayerGameSucceeded => {
+  return {
+    type: JOIN_MULTIPLAYER_GAME_SUCCEEDED,
+    gameData: gameData,
+  }
+}
+
+export const joinMultiplayerGameFailed = (): JoinMultiplayerGameFailed => {
+  return {
+    type: JOIN_MULTIPLAYER_GAME_FAILED,
   }
 }
 
@@ -86,7 +103,7 @@ export const selectedAnswerSet = (answer: string): SelectedAnswerSet => {
 }
 
 export const createNewSoloGame = () => {
-  return async (dispatch: Dispatch<HomeAction>) => {
+  return async (dispatch: Dispatch<GameAction>) => {
     dispatch(createNewSoloGameRequested())
     try {
       // Could be filled with game config in future updates
@@ -99,8 +116,22 @@ export const createNewSoloGame = () => {
   }
 }
 
+export const joinMultiplayerGame = () => {
+  return async (dispatch: Dispatch<GameAction>) => {
+    dispatch(joinMultiplayerGameRequested())
+    try {
+      // Could be filled with game config in future updates
+      const body = {}
+      const response = await axios.post(`${BASE_URL}/games`, body)
+      dispatch(joinMultiplayerGameSucceeded(response.data))
+    } catch (error) {
+      dispatch(joinMultiplayerGameFailed())
+    }
+  }
+}
+
 export const getGame = (gameId: string) => {
-  return async (dispatch: Dispatch<HomeAction>) => {
+  return async (dispatch: Dispatch<GameAction>) => {
     dispatch(getGameRequested())
     try {
       const response = await axios.get(`${BASE_URL}/games/${gameId}`)
@@ -112,7 +143,7 @@ export const getGame = (gameId: string) => {
 }
 
 export const updateRemainingPlayers = (gameId: string, userId: number, isWrong: boolean) => {
-  return async (dispatch: Dispatch<HomeAction>) => {
+  return async (dispatch: Dispatch<GameAction>) => {
     dispatch(updateRemainingPlayersRequested())
     try {
       if (isWrong) {

@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button"
 import { useDispatch, useSelector } from "react-redux"
 import { Navigate } from "react-router-dom"
 import { NIL as NIL_UUID } from "uuid"
-import { createNewSoloGame } from "../../store/game/GameActions"
+import { createNewSoloGame, joinMultiplayerGame } from "../../store/game/GameActions"
 import { State } from "../../store/store"
 import "../../stylesheets/home.css"
 
@@ -11,6 +11,7 @@ const Home = () => {
   // Set up state
   const dispatch = useDispatch()
   const isSearchingForGame = useSelector((state: State) => state.game.isSearchingForGame)
+  const isCreatingSoloGame = useSelector((state: State) => state.game.isCreatingSoloGame)
   const gameId = useSelector((state: State) => state.game.gameId)
 
   // We found a game
@@ -18,8 +19,34 @@ const Home = () => {
     return <Navigate to={`/games/${gameId}`} />
   }
   
-  // Component that starts a game
-  const FindGameButton = () => {
+  // Component that finds or starts a new multiplayer game
+  const FindGameButton = ({classes}: any) => {
+    const [requestJoinMultiplayerGame, setRequestJoinMultiplayerGame] = useState(false)
+    const handleClick = useCallback(() => {
+      setRequestJoinMultiplayerGame(true)
+    }, [requestJoinMultiplayerGame])
+
+    useEffect(() => {
+      if (requestJoinMultiplayerGame) {
+        dispatch(joinMultiplayerGame())
+      }
+    }, [requestJoinMultiplayerGame])
+
+    return (
+      <Button
+        className={`${classes} mt-5`}
+        variant="success"
+        size="lg"
+        onClick={!isSearchingForGame ? () => {handleClick()} : undefined}
+        disabled={isSearchingForGame || isCreatingSoloGame}
+      >
+        {isSearchingForGame ? "Searching..." : "Find a Game"}
+      </Button>
+    )
+  }
+
+  // Component that starts a solo game
+  const SoloGameButton = ({classes}: any) => {
     const [requestCreateNewSoloGame, setRequestCreateNewSoloGame] = useState(false)
     const handleClick = useCallback(() => {
       setRequestCreateNewSoloGame(true)
@@ -33,13 +60,13 @@ const Home = () => {
 
     return (
       <Button
-        className="mt-5"
+        className={`${classes} mt-5`}
         variant="success"
         size="lg"
-        onClick={!isSearchingForGame ? () => {handleClick()} : undefined}
-        disabled={isSearchingForGame}
+        onClick={!isCreatingSoloGame ? () => {handleClick()} : undefined}
+        disabled={isSearchingForGame || isCreatingSoloGame}
       >
-        {isSearchingForGame ? "Searching..." : "Find a Game"}
+        {isCreatingSoloGame ? "Creating..." : "Solo Game"}
       </Button>
     )
   }
@@ -55,7 +82,10 @@ const Home = () => {
       <div className="description mt-3">
         Find a game below!
       </div>
-      <FindGameButton />
+      <div>
+        <FindGameButton classes={"first-button"} />
+        <SoloGameButton classes={""} />
+      </div>
     </div>
   )
 }
