@@ -85,12 +85,13 @@ const Game = () => {
       }
     }, [shouldGameStartCheckIdBeCancelled])
   
+    const required = (gameState.requiredToStart !== undefined && gameState.totalUsers !== undefined) ? Math.max(0, gameState.requiredToStart - gameState.totalUsers) : 0
+
     // If game is waiting for players, but going to start shortly, stop interval that was looking for game state
-    if (gameState.isWaitingForNextRound && !shouldGameStartCheckIdBeCancelled) {
+    if (gameState.isWaitingForNextRound && required === 0 && !shouldGameStartCheckIdBeCancelled) {
       setShouldGameStartCheckIdBeCancelled(true)
     }
   
-    const required = (gameState.requiredToStart !== undefined && gameState.totalUsers !== undefined) ? Math.min(0, gameState.requiredToStart - gameState.totalUsers) : 0
     return (
       <div className="waiting-container">
         <div className="mb-3">
@@ -154,6 +155,7 @@ const Game = () => {
     // default to none of the choices selected
     const [selectedAnswer, setSelectedAnswer] = useState("")
     const handleChange = (event: any) => {
+      // remove 'answer-' from the string
       setSelectedAnswer((event.target.id as string).substr(7))
     }
 

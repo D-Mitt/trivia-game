@@ -141,41 +141,66 @@ app.post('/soloGames', function (req, res) {
 
 // Create a game that requires at least one other use to join
 app.post('/games', function (req, res) {
-  let newGame = {
-    gameId: uuid.v4(),
-    nextUserId: 2,
-    isWaitingForNextRound: false,
-    timeOfNextRound: new Date(),
-    currentRound: 0,
-    currentQuestion: "",
-    currentIncorrectAnswers: [],
-    currentCorrectAnswer: "",
-    status: "WAITING",
-    totalUsers: 1,
-    remainingUsers: [1],
-    requiredToStart: 2,
-    isSolo: false
-  }
-
-  db.Game.create(newGame)
-    .then(() => {
-      let toReturn = {
-        ...newGame,
-        userId: 1,
-      }
-      delete toReturn.nextUserId
-
-      // Change the game data with 2 seconds to spare so that people joining late won't have issues
-      setTimeout(setGameStarted, roundLength - 2000, toReturn)
-
-      return res.status(201).json(toReturn).end()
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "An error occurred while creating the Game."
+  db.Game.findOne({where: { status: "WAITING" }})
+  .then((game) => {
+    console.log("game: ", game)
+    // If no games are in waiting status, make a new one
+    if (game === null) {
+      const newGame = {
+        gameId: uuid.v4(),
+        nextUserId: 2,
+        isWaitingForNextRound: false,
+        timeOfNextRound: new Date(),
+        currentRound: 0,
+        currentQuestion: "",
+        currentIncorrectAnswers: [],
+        currentCorrectAnswer: "",
+        status: "WAITING",
+        totalUsers: 1,
+        remainingUsers: [1],
+        requiredToStart: 2,
+        isSolo: false,
+    }
+      return db.Game.create(newGame)
+      .then(() => {
+        return {...newGame, userId: 1}
       })
+    }
+
+    // If existing game update nextUserId, remaining users, isWaitingForNextRound, timeOfNextRound
+    const userId = game.dataValues.nextUserId
+    return db.Game.update(
+      { 
+        nextUserId: game.dataValues.nextUserId + 1,
+        isWaitingForNextRound: true, 
+        timeOfNextRound: new Date(Date.now() + roundLength),
+        remainingUsers: [...game.dataValues.remainingUsers, userId],
+        totalUsers: game.dataValues.totalUsers + 1
+      },
+      { returning: true, where: { gameId: game.dataValues.gameId }
     })
+    .then(function([ rowsUpdate, [updatedGame] ]) {
+          // Change the game data with 2 seconds to spare so that people joining late won't have issues
+      setTimeout(setGameStarted, roundLength - 2000, updatedGame)
+      return {...updatedGame.dataValues, userId: userId}
+    })
+  })
+  .then((game) => {
+
+    console.log("LAST GAME: ", game)
+    let toReturn = {
+      ...game,
+    }
+    delete toReturn.nextUserId
+
+    return res.status(200).json(toReturn).end()
+  })
+  .catch(err => {
+    res.status(500).send({
+      message:
+        err.message || "An error occurred while creating the Game."
+    })
+  })
 })
 
 app.get('/games/:gameId', function (req, res) {

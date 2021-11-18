@@ -2,11 +2,8 @@ import { NIL as NIL_UUID } from "uuid"
 import {
   CREATE_NEW_SOLO_GAME_FAILED,
   CREATE_NEW_SOLO_GAME_REQUESTED,
-  CREATE_NEW_SOLO_GAME_SUCCEEDED,
-  GameStatus,
-  GET_GAME_SUCCEEDED,
-  HomeAction,
-  SELECTED_ANSWER_SET,
+  CREATE_NEW_SOLO_GAME_SUCCEEDED, GameAction, GameStatus,
+  GET_GAME_SUCCEEDED, JOIN_MULTIPLAYER_GAME_FAILED, JOIN_MULTIPLAYER_GAME_REQUESTED, JOIN_MULTIPLAYER_GAME_SUCCEEDED, SELECTED_ANSWER_SET,
   UPDATE_REMAINING_PLAYERS_FAILED,
   UPDATE_REMAINING_PLAYERS_REQUESTED,
   UPDATE_REMAINING_PLAYERS_SUCCEEDED
@@ -48,6 +45,7 @@ const checkIfPlayerWon = (remainingPlayers: number[], userId: number): boolean =
 const gameReducer = (
   state = {
     isSearchingForGame: false,
+    isCreatingSoloGame: false,
     gameId: NIL_UUID,
     userId: 0,
     isWaitingForNextRound: false,
@@ -68,7 +66,7 @@ const gameReducer = (
     hasPlayerWon: false,
     isSolo: true,
   },
-  action: HomeAction
+  action: GameAction
 ) => {
   let newState = state
 
@@ -76,10 +74,64 @@ const gameReducer = (
     case CREATE_NEW_SOLO_GAME_REQUESTED:
       newState = {
         ...newState,
-        isSearchingForGame: true,
+        isCreatingSoloGame: true,
       }
       break
     case CREATE_NEW_SOLO_GAME_SUCCEEDED:
+      newState = {
+        ...newState,
+        isCreatingSoloGame: false,
+        gameId: action.gameData.gameId,
+        userId: action.gameData.userId,
+        isWaitingForNextRound: action.gameData.isWaitingForNextRound,
+        timeOfNextRound: action.gameData.timeOfNextRound,
+        currentRound: action.gameData.currentRound,
+        currentQuestion: action.gameData.currentQuestion,
+        currentIncorrectAnswers: action.gameData.currentIncorrectAnswers,
+        currentCorrectAnswer: action.gameData.currentCorrectAnswer,
+        status: action.gameData.status,
+        totalUsers: action.gameData.totalUsers,
+        remainingUsers: action.gameData.remainingUsers,
+        requiredToStart: action.gameData.requiredToStart,
+        isUpdatingRemainingPlayers: false,
+        hasSubmittedAnswer: false,
+        selectedAnswer: "",
+        hasPlayerLost: false,
+        hasPlayerWon: false,
+        isSolo: action.gameData.isSolo
+      }
+      break
+    case CREATE_NEW_SOLO_GAME_FAILED:
+      newState = {
+        ...newState,
+        isCreatingSoloGame: false,
+        gameId: NIL_UUID,
+        userId: 0,
+        isWaitingForNextRound: false,
+        timeOfNextRound: new Date(),
+        currentRound: 0,
+        currentQuestion: "",
+        currentIncorrectAnswers: [] as string[],
+        allCurrentAnswersShuffled: [] as string[],
+        currentCorrectAnswer: "",
+        status: GameStatus.Unknown,
+        totalUsers: 0,
+        remainingUsers: [0],
+        requiredToStart: 2,
+        isUpdatingRemainingPlayers: false,
+        hasSubmittedAnswer: false,
+        hasPlayerLost: false,
+        hasPlayerWon: false,
+        isSolo: false
+      }
+      break
+    case JOIN_MULTIPLAYER_GAME_REQUESTED:
+      newState = {
+        ...newState,
+        isSearchingForGame: true,
+      }
+      break
+    case JOIN_MULTIPLAYER_GAME_SUCCEEDED:
       newState = {
         ...newState,
         isSearchingForGame: false,
@@ -103,29 +155,7 @@ const gameReducer = (
         isSolo: action.gameData.isSolo
       }
       break
-    case GET_GAME_SUCCEEDED:
-      newState = {
-        ...newState,
-        isSearchingForGame: false,
-        gameId: action.gameData.gameId,
-        isWaitingForNextRound: action.gameData.isWaitingForNextRound,
-        timeOfNextRound: action.gameData.timeOfNextRound,
-        currentRound: action.gameData.currentRound,
-        currentQuestion: action.gameData.currentQuestion,
-        currentIncorrectAnswers: action.gameData.currentIncorrectAnswers,
-        currentCorrectAnswer: action.gameData.currentCorrectAnswer,
-        allCurrentAnswersShuffled: shuffle([...action.gameData.currentIncorrectAnswers, action.gameData.currentCorrectAnswer]),
-        status: action.gameData.status,
-        totalUsers: action.gameData.totalUsers,
-        remainingUsers: action.gameData.remainingUsers,
-        requiredToStart: action.gameData.requiredToStart,
-        hasPlayerLost: checkIfPlayerLost(action.gameData.remainingUsers, state.userId),
-        hasPlayerWon: checkIfPlayerWon(action.gameData.remainingUsers, state.userId),
-        hasSubmittedAnswer: false,
-        selectedAnswer: "",
-      }
-      break
-    case CREATE_NEW_SOLO_GAME_FAILED:
+    case JOIN_MULTIPLAYER_GAME_FAILED:
       newState = {
         ...newState,
         isSearchingForGame: false,
@@ -147,6 +177,28 @@ const gameReducer = (
         hasPlayerLost: false,
         hasPlayerWon: false,
         isSolo: false
+      }
+      break
+    case GET_GAME_SUCCEEDED:
+      newState = {
+        ...newState,
+        isCreatingSoloGame: false,
+        gameId: action.gameData.gameId,
+        isWaitingForNextRound: action.gameData.isWaitingForNextRound,
+        timeOfNextRound: action.gameData.timeOfNextRound,
+        currentRound: action.gameData.currentRound,
+        currentQuestion: action.gameData.currentQuestion,
+        currentIncorrectAnswers: action.gameData.currentIncorrectAnswers,
+        currentCorrectAnswer: action.gameData.currentCorrectAnswer,
+        allCurrentAnswersShuffled: shuffle([...action.gameData.currentIncorrectAnswers, action.gameData.currentCorrectAnswer]),
+        status: action.gameData.status,
+        totalUsers: action.gameData.totalUsers,
+        remainingUsers: action.gameData.remainingUsers,
+        requiredToStart: action.gameData.requiredToStart,
+        hasPlayerLost: checkIfPlayerLost(action.gameData.remainingUsers, state.userId),
+        hasPlayerWon: checkIfPlayerWon(action.gameData.remainingUsers, state.userId),
+        hasSubmittedAnswer: false,
+        selectedAnswer: "",
       }
       break
     case UPDATE_REMAINING_PLAYERS_REQUESTED:

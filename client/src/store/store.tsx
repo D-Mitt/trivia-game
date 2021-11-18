@@ -5,6 +5,7 @@ import { GameStatus } from "./game/GameConstants"
 export interface State {
   game: {
     isSearchingForGame: boolean
+    isCreatingSoloGame: boolean
     gameId: string
     userId: number
     isWaitingForNextRound: boolean
@@ -30,6 +31,7 @@ export interface State {
 const initialState: State = {
   game: {
     isSearchingForGame: false,
+    isCreatingSoloGame: false,
     gameId: NIL_UUID,
     userId: 0,
     isWaitingForNextRound: false,
