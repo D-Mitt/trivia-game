@@ -1,12 +1,13 @@
 import React from "react"
 import { Route, Routes as R } from "react-router-dom"
 import "../stylesheets/index.css"
+import End from "./end/End"
 import Game from "./game/Game"
 import Home from "./home/Home"
 
 const NotFound = () => {
   return (
-    <div className={"dark-mode-background"}>
+    <div className="mt-5 dark-mode-background">
       <h1>Sorry, page not found</h1>
     </div>
   )
@@ -22,6 +23,10 @@ const Routes = (): JSX.Element => {
       <Route 
         path="/games/:id"
         element={<Game />}
+      />
+      <Route 
+        path="/end"
+        element={<End />}
       />
       <Route path="*" element={<NotFound/>} />
     </R>

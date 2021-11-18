@@ -7,7 +7,7 @@ import { createNewGame } from "../../store/game/GameActions"
 import { State } from "../../store/store"
 import "../../stylesheets/home.css"
 
-const Home = () => {
+const End = () => {
   // Set up state
   const dispatch = useDispatch()
   const isSearchingForGame = useSelector((state: State) => state.game.isSearchingForGame)
@@ -46,18 +46,18 @@ const Home = () => {
 
   return (
     <div>
-      <div className="title mt-5">
-        Welcome to the Trivia Quiz!
+      <div className="mt-5 alerting">
+        Oh no, you lost!
       </div>
       <div className="description mt-3">
         Compete with other players to see who can correctly answer the most questions.
       </div>
       <div className="description mt-3">
-        Find a game below!
+       Play again?
       </div>
       <FindGameButton />
     </div>
   )
 }
 
-export default Home
+export default End

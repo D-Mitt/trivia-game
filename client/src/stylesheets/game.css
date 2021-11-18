@@ -13,10 +13,16 @@
   margin-left: 1rem !important;
 }
 
-.round-start {
+.alerting {
   font-size: calc(14px + 2vmin);
   font-weight: 500;
   color: chocolate;
+}
+
+.win {
+  font-size: calc(14px + 2vmin);
+  font-weight: 500;
+  color: #198754;
 }
 
 .answer {
@@ -25,11 +31,11 @@
 }
 
 .answer-border-correct {
-  border: 5px solid green;
+  border: 5px solid #198754;
   border-radius: 12px;
 }
 
 .answer-border-wrong {
-  border: 5px solid red;
+  border: 5px solid chocolate;
   border-radius: 12px;
 }
