@@ -18,3 +18,18 @@
   font-weight: 500;
   color: chocolate;
 }
+
+.answer {
+  align-items: center;
+  text-align: left;
+}
+
+.answer-border-correct {
+  border: 5px solid green;
+  border-radius: 12px;
+}
+
+.answer-border-wrong {
+  border: 5px solid red;
+  border-radius: 12px;
+}

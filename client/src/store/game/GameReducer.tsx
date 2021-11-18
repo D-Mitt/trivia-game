@@ -5,11 +5,15 @@ import {
   CREATE_NEW_GAME_SUCCEEDED,
   GameStatus,
   GET_GAME_SUCCEEDED,
-  HomeAction
+  HomeAction,
+  SELECTED_ANSWER_SET,
+  UPDATE_REMAINING_PLAYERS_FAILED,
+  UPDATE_REMAINING_PLAYERS_REQUESTED,
+  UPDATE_REMAINING_PLAYERS_SUCCEEDED
 } from "./GameConstants"
 
 // Fisher-Yates shuffle algorithm found here: http://sedition.com/perl/javascript-fy.html
-const shuffle = (array: any[]) => {
+const shuffle = (array: string[]) => {
   let currentIndex = array.length,  randomIndex
 
   // While there remain elements to shuffle...
@@ -25,6 +29,20 @@ const shuffle = (array: any[]) => {
   }
 
   return array
+}
+
+// Checking if player lost
+// It is a loss if userId can not be found in the remaining Users
+const checkIfPlayerLost = (remainingPlayers: number[], userId: number): boolean => {
+  return remainingPlayers.findIndex((playerId: number) => {
+    return playerId === userId
+  }) === -1
+}
+
+// Checking if player won
+// It is a win if userId is the only id left in the array
+const checkIfPlayerWon = (remainingPlayers: number[], userId: number): boolean => {
+  return remainingPlayers.length === 1 && remainingPlayers[0] === userId
 }
 
 const gameReducer = (
@@ -43,6 +61,11 @@ const gameReducer = (
     totalUsers: 0,
     remainingUsers: [0],
     requiredToStart: 2,
+    isUpdatingRemainingPlayers: false,
+    hasSubmittedAnswer: false,
+    selectedAnswer: "",
+    hasPlayerLost: false,
+    hasPlayerWon: false
   },
   action: HomeAction
 ) => {
@@ -71,7 +94,11 @@ const gameReducer = (
         totalUsers: action.gameData.totalUsers,
         remainingUsers: action.gameData.remainingUsers,
         requiredToStart: action.gameData.requiredToStart,
-
+        isUpdatingRemainingPlayers: false,
+        hasSubmittedAnswer: false,
+        selectedAnswer: "",
+        hasPlayerLost: false,
+        hasPlayerWon: false
       }
       break
     case GET_GAME_SUCCEEDED:
@@ -90,7 +117,10 @@ const gameReducer = (
         totalUsers: action.gameData.totalUsers,
         remainingUsers: action.gameData.remainingUsers,
         requiredToStart: action.gameData.requiredToStart,
-
+        hasPlayerLost: checkIfPlayerLost(action.gameData.remainingUsers, state.userId),
+        hasPlayerWon: checkIfPlayerWon(action.gameData.remainingUsers, state.userId),
+        hasSubmittedAnswer: false,
+        selectedAnswer: "",
       }
       break
     case CREATE_NEW_GAME_FAILED:
@@ -109,7 +139,36 @@ const gameReducer = (
         status: GameStatus.Unknown,
         totalUsers: 0,
         remainingUsers: [0],
-        requiredToStart: 2
+        requiredToStart: 2,
+        isUpdatingRemainingPlayers: false,
+        hasSubmittedAnswer: false,
+        hasPlayerLost: false,
+        hasPlayerWon: false
+      }
+      break
+    case UPDATE_REMAINING_PLAYERS_REQUESTED:
+      newState = {
+        ...newState,
+        isUpdatingRemainingPlayers: true,
+        hasSubmittedAnswer: true
+      }
+      break
+    case UPDATE_REMAINING_PLAYERS_SUCCEEDED:
+      newState = {
+        ...newState,
+        isUpdatingRemainingPlayers: false
+      }
+      break
+    case UPDATE_REMAINING_PLAYERS_FAILED:
+      newState = {
+        ...newState,
+        isUpdatingRemainingPlayers: false
+      }
+      break
+    case SELECTED_ANSWER_SET:
+      newState = {
+        ...newState,
+        selectedAnswer: action.answer
       }
       break
   }
