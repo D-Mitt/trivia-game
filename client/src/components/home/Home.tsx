@@ -90,7 +90,6 @@ const Home = () => {
       <ul className="rules mt-5 mx-3 d-flex">
         <li>When the game begins, you will have 12 seconds to answer a multiple choice question.</li>
         <li>After submitting your answer the correct answer will be displayed in <span className="green">green</span>.</li>
-        <li>Ties count as a loss (sorry!)</li>
       </ul>
     </div>
   )

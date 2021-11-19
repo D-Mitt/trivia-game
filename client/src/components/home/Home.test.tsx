@@ -50,8 +50,5 @@ describe("Home", () => {
 
     expect(listItems.get(1)).toBeTruthy()
     expect(listItems.at(1).text()).toEqual("After submitting your answer the correct answer will be displayed in green.")
-
-    expect(listItems.get(2)).toBeTruthy()
-    expect(listItems.at(2).text()).toEqual("Ties count as a loss (sorry!)")
   })
 })
