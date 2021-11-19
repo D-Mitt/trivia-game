@@ -138,6 +138,14 @@ const Game = () => {
       plural = "second"
     }
 
+    if (gameState.hasSubmittedAnswer) {
+      return (
+        <div className="alerting mb-5">
+        {`${startTime} ${plural} until the round is over!`}
+      </div>
+      )
+    }
+
     // TODO: potentially change color based on how much time is left
     return (
       <div className="alerting mb-5">
@@ -192,6 +200,7 @@ const Game = () => {
     )
   }
 
+  // Used when the player submits an answer
   const UpdateRemainingPlayersButton = ({selectedAnswer}: any) => {
     const [requestUpdateRemainingPlayers, setRequestUpdateRemainingPlayers] = useState(false)
     const handleClick = () => {
@@ -247,8 +256,9 @@ const Game = () => {
     )
   }
 
+  // Displays the win or lose screen
   const EndScreen = () => {    
-    const FindGameButton = () => {
+    const HomeButton = () => {
 
       return (
         <Button
@@ -275,7 +285,7 @@ const Game = () => {
         <div className="description mt-3">
           Play again?
         </div>
-        <FindGameButton />
+        <HomeButton />
       </div>
     )
   }

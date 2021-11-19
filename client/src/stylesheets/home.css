@@ -11,3 +11,16 @@
 .first-button {
   margin-right: 1rem;
 }
+
+.rules {
+  font-size: calc(8px + 1vmin);
+  font-weight: 300;
+  align-items: center;
+  flex-direction: column;
+  align-items: start;
+}
+
+.green {
+  color: #198754;
+  font-weight: 600;
+}

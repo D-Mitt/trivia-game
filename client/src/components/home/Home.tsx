@@ -7,6 +7,7 @@ import { createNewSoloGame, joinMultiplayerGame } from "../../store/game/GameAct
 import { State } from "../../store/store"
 import "../../stylesheets/home.css"
 
+// The landing page of the app
 const Home = () => {
   // Set up state
   const dispatch = useDispatch()
@@ -86,6 +87,11 @@ const Home = () => {
         <FindGameButton classes={"first-button"} />
         <SoloGameButton classes={""} />
       </div>
+      <ul className="rules mt-5 mx-3 d-flex">
+        <li>When the game begins, you will have 12 seconds to answer a multiple choice question.</li>
+        <li>After submitting your answer the correct answer will be displayed in <span className="green">green</span>.</li>
+        <li>Ties count as a loss (sorry!)</li>
+      </ul>
     </div>
   )
 }
