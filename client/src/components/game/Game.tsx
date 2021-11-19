@@ -292,7 +292,8 @@ const Game = () => {
   
   if (gameState.status === GameStatus.Waiting) {
     return <WaitingArea gameStartCheckId={gameStartCheckId} />
-  } else if (gameState.status === GameStatus.Started) {
+  } else if (gameState.status === GameStatus.Started && (!gameState.hasPlayerLost || gameState.currentRound <= 1)) {
+    // On first round, playerLost is false and round is 1, so we still want to come in here. After that, if the player gets a question wrong, we want to end the game
     return <QuestionArea />
   } else   if (gameState.status === GameStatus.Done || gameState.hasPlayerLost) {
     // Assumption is that if player won, game will be in the done state.
