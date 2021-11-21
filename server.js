@@ -172,12 +172,13 @@ app.post('/games', function (req, res) {
     }
 
     // If existing game update nextUserId, remaining users, isWaitingForNextRound, timeOfNextRound
+    // Note: Only update time to next round on the addition of the first user that will start the game
     const userId = game.dataValues.nextUserId
     return db.Game.update(
       { 
         nextUserId: game.dataValues.nextUserId + 1,
         isWaitingForNextRound: true, 
-        timeOfNextRound: new Date(Date.now() + roundLength),
+        timeOfNextRound: game.dataValues.totalUsers + 1 === game.dataValues.requiredToStart ? new Date(Date.now() + roundLength) : game.dataValues.timeOfNextRound,
         remainingUsers: [...game.dataValues.remainingUsers, userId],
         totalUsers: game.dataValues.totalUsers + 1
       },
